@@ -1,10 +1,15 @@
 import pygame
-from .constants import BG_COLOR, BOARD_SIZE, BLACK, WHITE, SQ_COLOR, ROWS, COLS, W_DIFF, H_DIFF, SQUARE_SIZE
+from .constants import BLACK, WHITE, BG_COLOR, SQ_COLOR, BOARD_SIZE, SQUARE_SIZE, ROWS, COLS, W_DIFF, H_DIFF
+from .player import Player
+from .pawn import Pawn
+
 
 class Board:
 
     def __init__(self):
         self.board = []
+        self.player_count = 2
+        self.players = []
         self.create_board()
         self.selected_space = None
 
@@ -22,6 +27,17 @@ class Board:
             for _ in range(COLS):
                 row.append("")
             self.board.append(row)
+        for num in range(self.player_count):
+            player = Player(num)
+            x = player.start_coords[0]
+            y = player.start_coords[1]
+            self.players.append(player)
+            self.board[x][y] = Pawn((x, y), num+1)
 
-    def draw_pawns(self, win):
-        pass
+    def draw(self, win):
+        self.draw_board(win)
+        for row in range(ROWS):
+            for col in range(COLS):
+                pawn = self.board[row][col]
+                if pawn != "":
+                    pawn.draw(win)

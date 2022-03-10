@@ -2,6 +2,7 @@ import pygame
 from quoridor.constants import *
 from quoridor.board import Board
 
+
 FPS = 60
 
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -22,7 +23,7 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pass
 
-        board.draw_board(WIN)
+        board.draw(WIN)
         pygame.display.update()
 
     pygame.quit()
