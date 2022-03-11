@@ -1,8 +1,12 @@
+from .constants import *
+from .fence import Fence
+
 class Player():
 
     def __init__(self, number):
         self.player_number = number
-        if self.player_number == 1:
-            self.start_coords = (0, 4)
-        else:
-            self.start_coords = (8, 4)
+        self.start_coords = START_COORDS[number]
+        self.color = P_COLORS[number]
+
+    def place_fence(self, fence, win):
+        fence.draw_fence(win, self.color)
