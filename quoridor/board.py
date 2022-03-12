@@ -14,9 +14,10 @@ class Board:
         self.player_count = 2
         self.players = []
         self.turn = 0
+        self.pawns = []
+        self.selected_pawn = None
         self.buttons = []
         self.button_coords = []
-        self.selected_pawn = None
         self.selected_button = None
         self.move_type = None
         self.create_board()
@@ -119,12 +120,14 @@ class Board:
             x = player.start_coords[0]
             y = player.start_coords[1]
             self.players.append(player)
-            self.board[x][y] = Pawn((x, y), num, player.color)
+            pawn = Pawn((x, y), num, player.color)
+            self.board[x][y] = pawn
+            self.pawns.append(pawn)
 
     def create_buttons(self):
         ids = ["pawn", "fence"]
         texts = ["MOVE PAWN", "PLACE FENCE"]
-        h_offsets = [TOTAL_HEIGHT//3, TOTAL_HEIGHT//3 + 60]
+        h_offsets = [TOTAL_HEIGHT//2 - (B_GAP+B_HEIGHT), TOTAL_HEIGHT//2 + B_GAP]
         for i in range(len(ids)):
             self.buttons.append(Button(ids[i], texts[i], h_offsets[i]))
             self.button_coords.append([(TOTAL_HEIGHT, TOTAL_HEIGHT+B_WIDTH), (h_offsets[i], h_offsets[i]+B_HEIGHT)])
@@ -134,10 +137,18 @@ class Board:
     def draw_board(self, win):
         win.fill(BG_COLOR)
         pygame.draw.rect(win, BLACK, (BOARD_X_START, BOARD_Y_START, BOARD_SIZE, BOARD_SIZE))
-        pygame.draw.rect(win, WHITE, (BOARD_X_START+PADDING, BOARD_Y_START+PADDING, BOARD_SIZE-10, BOARD_SIZE-10))
+        pygame.draw.rect(win, WHITE, (BOARD_X_START+PADDING, BOARD_Y_START+PADDING, BOARD_SIZE-PADDING*2, BOARD_SIZE-PADDING*2))
         for row in range(ROWS):
             for col in range(COLS):
                 pygame.draw.rect(win, SQ_COLOR, (row*SQUARE_SIZE+EDGE, col*SQUARE_SIZE+EDGE, SPACE_SIZE, SPACE_SIZE))
+        for player in self.players:
+            for i in range((BOARD_SIZE-PADDING*2)//PADDING):
+                if (i % 2) == 0:
+                    color = player.color
+                else:
+                    color = WHITE
+                pygame.draw.rect(win, color, ((BOARD_X_START+PADDING)+PADDING*i, player.goal_line, PADDING, PADDING))
+        
 
     def draw_buttons(self, win):
         for button in self.buttons:
@@ -148,14 +159,11 @@ class Board:
         
     def draw(self, win):
         self.draw_board(win)
-        for row in range(ROWS):
-            for col in range(COLS):
-                pawn = self.board[row][col]
-                if pawn != "":
-                    if pawn == self.selected_pawn:
-                        pawn.draw(win, BLACK)
-                    else:
-                        pawn.draw(win)
+        for pawn in self.pawns:
+            if pawn == self.selected_pawn:
+                pawn.draw(win, BLACK)
+            else:
+                pawn.draw(win)
         
         # draw fences
 
