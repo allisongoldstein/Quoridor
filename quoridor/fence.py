@@ -12,12 +12,15 @@ class Fence():
 
     def draw_fence(self, win):
         if self.orientation == "h":
-            x = self.row * SQUARE_SIZE
-            y = self.col * SQUARE_SIZE - 5
+            x = (self.row) * SQUARE_SIZE
+            y = (self.col + 2) * SQUARE_SIZE - 5
             width, height = FENCE_LONG, FENCE_SHORT
         else:
-            x = self.row * SQUARE_SIZE - 5
-            y = self.col * SQUARE_SIZE
+            x = (self.row + 2) * SQUARE_SIZE - 5
+            y = (self.col) * SQUARE_SIZE
             width, height = FENCE_SHORT, FENCE_LONG
         pygame.draw.rect(win, self.color, (x, y, width, height))
+
+    def __repr__(self):
+        return str(self.row) + ", " + str(self.col) + ", " + str(self.orientation)
     

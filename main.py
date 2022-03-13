@@ -17,12 +17,12 @@ def pawn_row_col_from_mouse(pos):
 
 def fence_row_col_from_mouse(pos):
     x, y = pos
-    for i in range(ROWS+1):
+    for i in range(len(F_RANGES)):
         if x in range(F_RANGES[i][0], F_RANGES[i][1]):
-            x = i + 1
+            x = i
         if y in range(F_RANGES[i][0], F_RANGES[i][1]):
-            y = i + 1
-    if x > 10 and y > 10 or (x < 10 and y < 10):
+            y = i
+    if x > 9 and y > 9 or (x < 9 and y < 9):
         print("not a fence")
         return False
     elif x > 10:

@@ -45,7 +45,12 @@ class Board:
         player = self.players[self.turn]
         fence = player.place_fence((x, y), orientation)
         if fence is False:
-            return
+            return False
+        if orientation == "h":
+            self.h_fences[x][y] = fence
+        elif orientation == "v":
+            self.v_fences[x][y] = fence
+        print(fence)
         self.fences.append(fence)
         self.update_turn()
 
