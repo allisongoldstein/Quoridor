@@ -10,27 +10,28 @@ pygame.display.set_caption('Quoridor')
 
 
 def pawn_row_col_from_mouse(pos):
-    x, y = pos
-    row = (y // SQUARE_SIZE) - 1
-    col = (x // SQUARE_SIZE) - 1
+    y, x = pos
+    row = (x // SQUARE_SIZE) - 1
+    col = (y // SQUARE_SIZE) - 1
     return row, col
 
 def fence_row_col_from_mouse(pos):
-    x, y = pos
+    y, x = pos
     for i in range(len(F_RANGES)):
         if x in range(F_RANGES[i][0], F_RANGES[i][1]):
-            x = i
+            x = i + 1
         if y in range(F_RANGES[i][0], F_RANGES[i][1]):
-            y = i
+            y = i + 1
     if x > 9 and y > 9 or (x < 9 and y < 9):
         print("not a fence")
         return False
     elif x > 10:
-        x = (x // SQUARE_SIZE)
-        orientation = "h"
-    elif y > 10:
-        y = (y // SQUARE_SIZE)
+        x = (x // SQUARE_SIZE) - 1
         orientation = "v"
+    elif y > 10:
+        y = (y // SQUARE_SIZE) - 1
+        orientation = "h"
+    print(x,y)
     return x, y, orientation
 
 

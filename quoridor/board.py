@@ -20,8 +20,8 @@ class Board:
         self.button_coords = []
         self.selected_button = None
         self.fences = []
-        self.h_fences = [["" for _ in range(ROWS)] for _ in range(COLS)]
-        self.v_fences = [["" for _ in range(ROWS)] for _ in range(COLS)]
+        self.h_fences = [["" for _ in range(ROWS+1)] for _ in range(COLS+1)]
+        self.v_fences = [["" for _ in range(ROWS+1)] for _ in range(COLS+1)]
         self.move_type = None
         self.create_board()
 
@@ -33,16 +33,21 @@ class Board:
             self.selected_pawn = None
             print("invalid move")
             return False
+        
+        if self.fence_check(pawn.row, pawn.col, row, col) is False:
+            print("watch out for the fence, buddy")
+            return False
+
         self.board[pawn.row][pawn.col], self.board[row][col] = self.board[row][col], self.board[pawn.row][pawn.col]
         pawn.move(row, col)
 
         self.selected_pawn = None
-        self.update_turn()
+        # self.update_turn()
 
         # check for win pos
 
     def place_fence(self, x, y, orientation):
-        if not self.open_fence_space(x, y, orientation):
+        if self.has_fence(x, y, orientation):
             print("fence already exists at location")
             return False
         player = self.players[self.turn]
@@ -53,9 +58,34 @@ class Board:
             self.h_fences[x][y] = fence
         elif orientation == "v":
             self.v_fences[x][y] = fence
-        print(fence)
         self.fences.append(fence)
-        self.update_turn()
+        # self.update_turn()
+
+    def fence_check(self, row, col, new_row, new_col):
+        if new_row == row:
+            orientation = "v"
+        elif new_col == col:
+            orientation = "h"
+        else:
+            print("implement diagonal move checks later")
+            return
+
+        if orientation == "h":
+            f_x = max(row, new_row)
+            if self.has_fence(f_x, col, orientation):
+                print("yep, that's a horizontal fence @ ", f_x, col)
+                return False
+            else:
+                print("no fence detected")
+        elif orientation == "v":
+            f_y = max(col, new_col)
+            if self.has_fence(row, f_y, orientation):
+                print("yep, that's a vertical fence @ ", row, f_y)
+                return False
+            else:
+                print("no fence detected")
+
+        return True
 
     def update_turn(self):
         if self.turn == 0:
@@ -93,14 +123,14 @@ class Board:
 
         return True
 
-    def open_fence_space(self, x, y, orientation):
+    def has_fence(self, x, y, orientation):
         if orientation == "h":
             if self.h_fences[x][y] != "":
-                return False
+                return True
         elif orientation == "v":
             if self.v_fences[x][y] != "":
-                return False
-        return True
+                return True
+        return False
 
     def set_selected_pawn(self, row, col):
         if self.move_type != "pawn":
@@ -120,6 +150,7 @@ class Board:
     def set_selected_button(self, button):
         if button.id == "fence":
             if self.players[self.turn].has_fences is False:
+                print("player has no fences")
                 return False
         self.selected_button = button
         self.set_move_type(button.id)
@@ -177,11 +208,11 @@ class Board:
         self.move_type = self.selected_button.id
 
     def create_fences(self):
-        for i in range(ROWS):
-            for j in range(COLS):
-                if not 0 < i < ROWS-1:
+        for i in range(ROWS+1):
+            for j in range(COLS+1):
+                if not 0 < i < ROWS:
                     self.h_fences[i][j] = "EDGE"
-                if not 0 < j < COLS-1:
+                if not 0 < j < COLS:
                     self.v_fences[i][j] = "EDGE"
         
     def draw_board(self, win):

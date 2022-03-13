@@ -21,5 +21,4 @@ class Player():
             if self.remaining_fences == 0:
                 self.has_fences = False
             return fence
-        print("player has no fences")
         return False
