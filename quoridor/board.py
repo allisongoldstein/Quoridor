@@ -74,9 +74,10 @@ class Board:
 
     def fence_check(self, row, col, new_row, new_col, checks=1):
         if checks == 2:
-            orientation = "v"
+            orientation = "h"
             start_x = max(row, new_row)
             if self.has_fence(start_x, col, orientation) or self.has_fence(start_x-1, col, orientation):
+                print("watch out for the fence")
                 return False
         else:
             if new_row == row:
