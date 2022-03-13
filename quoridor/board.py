@@ -42,6 +42,9 @@ class Board:
         # check for win pos
 
     def place_fence(self, x, y, orientation):
+        if not self.open_fence_space(x, y, orientation):
+            print("fence already exists at location")
+            return False
         player = self.players[self.turn]
         fence = player.place_fence((x, y), orientation)
         if fence is False:
@@ -88,6 +91,15 @@ class Board:
         elif self.board[row][col] != "":
             return False
 
+        return True
+
+    def open_fence_space(self, x, y, orientation):
+        if orientation == "h":
+            if self.h_fences[x][y] != "":
+                return False
+        elif orientation == "v":
+            if self.v_fences[x][y] != "":
+                return False
         return True
 
     def set_selected_pawn(self, row, col):
