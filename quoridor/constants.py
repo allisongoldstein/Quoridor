@@ -34,5 +34,7 @@ B_HEIGHT = 30
 B_GAP = 20
 B_PADDING = 3
 
+F_RANGES = [(SPACE_SIZE*(i+1)+(i*5), SPACE_SIZE*(i+1)+(i+1)*5) for i in range(ROWS+1)]
+
 # 610-750
 # 205-235

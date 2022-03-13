@@ -4,17 +4,20 @@ from .constants import *
 
 class Fence():
 
-    def __init__(self, coords, orientation):
+    def __init__(self, coords, orientation, color):
         self.row = coords[0]
         self.col = coords[1]
         self.orientation = orientation
+        self.color = color
 
-    def draw_fence(self, win, color):
-        x = self.row * SQUARE_SIZE - 10
-        y = self.col * SQUARE_SIZE - 5
+    def draw_fence(self, win):
         if self.orientation == "h":
+            x = self.row * SQUARE_SIZE
+            y = self.col * SQUARE_SIZE - 5
             width, height = FENCE_LONG, FENCE_SHORT
         else:
+            x = self.row * SQUARE_SIZE - 5
+            y = self.col * SQUARE_SIZE
             width, height = FENCE_SHORT, FENCE_LONG
-        pygame.draw.rect(win, color, (x, y, width, height))
+        pygame.draw.rect(win, self.color, (x, y, width, height))
     

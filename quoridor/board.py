@@ -19,6 +19,9 @@ class Board:
         self.buttons = []
         self.button_coords = []
         self.selected_button = None
+        self.fences = []
+        self.h_fences = [["" for _ in range(ROWS)] for _ in range(COLS)]
+        self.v_fences = [["" for _ in range(ROWS)] for _ in range(COLS)]
         self.move_type = None
         self.create_board()
 
@@ -34,19 +37,25 @@ class Board:
         pawn.move(row, col)
 
         self.selected_pawn = None
+        self.update_turn()
+
+        # check for win pos
+
+    def place_fence(self, x, y, orientation):
+        player = self.players[self.turn]
+        fence = player.place_fence((x, y), orientation)
+        if fence is False:
+            return
+        self.fences.append(fence)
+        self.update_turn()
+
+    def update_turn(self):
         if self.turn == 0:
             self.turn = 1
         else:
             self.turn = 0
-
-        # check for win pos
-
-    def valid_turn(self, pawn):
-        if pawn.id == self.turn:
-            return True
-        else:
-            print("invalid turn")
-            return False
+        button = self.get_button_by_id("pawn")
+        self.set_selected_button(button)
 
     def on_board(self, coords):
         x, y = coords
@@ -55,8 +64,26 @@ class Board:
         else:
             return False
 
+    def valid_turn(self, pawn):
+        if pawn.id == self.turn:
+            return True
+        else:
+            print("invalid turn")
+            return False
+
     def valid_space(self, row, col):
         return (0 <= row < ROWS and 0 <= col < COLS)
+
+    def open_space(self, row, col):
+        if not self.valid_space(row, col):
+            return False
+        if self.board[row][col] == self.selected_pawn:
+            self.selected_pawn = None
+            return False
+        elif self.board[row][col] != "":
+            return False
+
+        return True
 
     def set_selected_pawn(self, row, col):
         if self.move_type != "pawn":
@@ -74,6 +101,9 @@ class Board:
         return False
 
     def set_selected_button(self, button):
+        if button.id == "fence":
+            if self.players[self.turn].has_fences is False:
+                return False
         self.selected_button = button
         self.set_move_type(button.id)
 
@@ -81,22 +111,16 @@ class Board:
         self.move_type = type
         self.selected_pawn = None
 
-    def open_space(self, row, col):
-        if not self.valid_space(row, col):
-            return False
-        if self.board[row][col] == self.selected_pawn:
-            self.selected_pawn = None
-            return False
-        elif self.board[row][col] != "":
-            return False
-
-        return True
-
     def get_player(self):
         return self.players[self.turn]
 
     def get_pawn(self, row, col):
         return self.board[row][col]
+
+    def get_button_by_id(self, id):
+        for button in self.buttons:
+            if button.id == id:
+                return button
 
     def is_button(self, pos):
         for i in range(len(self.buttons)):
@@ -113,6 +137,7 @@ class Board:
             self.board.append(row)
         self.create_players()
         self.create_buttons()
+        self.create_fences()
 
     def create_players(self):
         for num in range(self.player_count):
@@ -133,6 +158,14 @@ class Board:
             self.button_coords.append([(TOTAL_HEIGHT, TOTAL_HEIGHT+B_WIDTH), (h_offsets[i], h_offsets[i]+B_HEIGHT)])
         self.selected_button = self.buttons[0]
         self.move_type = self.selected_button.id
+
+    def create_fences(self):
+        for i in range(ROWS):
+            for j in range(COLS):
+                if not 0 < i < ROWS-1:
+                    self.h_fences[i][j] = "EDGE"
+                if not 0 < j < COLS-1:
+                    self.v_fences[i][j] = "EDGE"
         
     def draw_board(self, win):
         win.fill(BG_COLOR)
@@ -149,13 +182,16 @@ class Board:
                     color = WHITE
                 pygame.draw.rect(win, color, ((BOARD_X_START+PADDING)+PADDING*i, player.goal_line, PADDING, PADDING))
         
-
     def draw_buttons(self, win):
         for button in self.buttons:
             if button == self.selected_button:
                 button.draw(win, "selected")
             else:
                 button.draw(win)
+
+    def draw_fences(self, win):
+        for fence in self.fences:
+            fence.draw_fence(win)
         
     def draw(self, win):
         self.draw_board(win)
@@ -165,6 +201,6 @@ class Board:
             else:
                 pawn.draw(win)
         
-        # draw fences
+        self.draw_fences(win)
 
         self.draw_buttons(win)

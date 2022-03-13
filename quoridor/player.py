@@ -14,5 +14,12 @@ class Player():
         else:
             self.goal_line = BOARD_Y_END-PADDING
 
-    def place_fence(self, win, fence):
-        fence.draw_fence(win, self.color)
+    def place_fence(self, coords, orientation):
+        if self.has_fences:
+            fence = Fence(coords, orientation, self.color)
+            self.remaining_fences -= 1
+            if self.remaining_fences == 0:
+                self.has_fences = False
+            return fence
+        print("player has no fences")
+        return False
