@@ -23,10 +23,10 @@ class Board:
         self.h_fences = [["" for _ in range(ROWS+1)] for _ in range(COLS+1)]
         self.v_fences = [["" for _ in range(ROWS+1)] for _ in range(COLS+1)]
         self.move_type = None
+        self.game_status = "unfinished"
         self.create_board()
 
     def move_pawn(self, row, col):
-        # checks
         pawn = self.selected_pawn
 
         if not self.open_space(row, col) or not pawn.valid_move(row, col):
@@ -40,11 +40,12 @@ class Board:
 
         self.board[pawn.row][pawn.col], self.board[row][col] = self.board[row][col], self.board[pawn.row][pawn.col]
         pawn.move(row, col)
-
         self.selected_pawn = None
-        # self.update_turn()
 
-        # check for win pos
+        self.win_check(pawn)
+
+        if self.game_status == "unfinished":
+            self.update_turn()
 
     def place_fence(self, x, y, orientation):
         if self.has_fence(x, y, orientation):
@@ -59,7 +60,7 @@ class Board:
         elif orientation == "v":
             self.v_fences[x][y] = fence
         self.fences.append(fence)
-        # self.update_turn()
+        self.update_turn()
 
     def fence_check(self, row, col, new_row, new_col):
         if new_row == row:
@@ -94,6 +95,16 @@ class Board:
             self.turn = 0
         button = self.get_button_by_id("pawn")
         self.set_selected_button(button)
+
+    def win_check(self, pawn):
+        if self.turn == 0:
+            check = 1
+        else:
+            check = 0
+        if pawn.row == START_COORDS[check][0]:
+            print("player", self.turn, "wins")
+            self.game_status = "finished"
+            return True
 
     def on_board(self, coords):
         x, y = coords

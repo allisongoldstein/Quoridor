@@ -51,7 +51,7 @@ def main():
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
-                if board.on_board(pos):
+                if board.game_status == "unfinished" and board.on_board(pos):
                     if board.move_type == "pawn":
                         row, col = pawn_row_col_from_mouse(pos)
                         if board.selected_pawn is None:
@@ -64,9 +64,10 @@ def main():
                             x, y, orientation = fence_row_col_from_mouse(pos)
                             board.place_fence(x, y, orientation)
                 else:
-                    button = board.is_button(pos)
-                    if button:
-                        board.set_selected_button(button)
+                    if board.game_status == "unfinished":
+                        button = board.is_button(pos)
+                        if button:
+                            board.set_selected_button(button)
 
         board.draw(WIN)
         
