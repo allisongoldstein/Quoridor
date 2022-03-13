@@ -17,15 +17,6 @@ class Pawn():
         self.col = col
         self.calc_pos()
 
-    def valid_move(self, row, col):
-        if 0 <= row < ROWS and 0 <= col < COLS:
-            x_dif = abs(row - self.row)
-            y_dif = abs(col - self.col)
-            if x_dif <= 1 and y_dif <= 1:
-                if (x_dif + y_dif) > 0:
-                    return True
-        return False
-
     def calc_pos(self):
         self.x = SQUARE_SIZE * self.col + SQUARE_SIZE // 2 + EDGE - PADDING//2
         self.y = SQUARE_SIZE * self.row + SQUARE_SIZE // 2 + EDGE - PADDING//2

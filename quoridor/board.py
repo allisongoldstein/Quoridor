@@ -29,13 +29,9 @@ class Board:
     def move_pawn(self, row, col):
         pawn = self.selected_pawn
 
-        if not self.open_space(row, col) or not pawn.valid_move(row, col):
+        if not self.open_space(row, col) or not self.valid_move(pawn, row, col):
             self.selected_pawn = None
             print("invalid move")
-            return False
-        
-        if self.fence_check(pawn.row, pawn.col, row, col) is False:
-            print("watch out for the fence, buddy")
             return False
 
         self.board[pawn.row][pawn.col], self.board[row][col] = self.board[row][col], self.board[pawn.row][pawn.col]
@@ -46,6 +42,20 @@ class Board:
 
         if self.game_status == "unfinished":
             self.update_turn()
+
+    def valid_move(self, pawn, row, col):
+        if 0 <= row < ROWS and 0 <= col < COLS:
+            x_dif = abs(row - pawn.row)
+            y_dif = abs(col - pawn.col)
+            if x_dif == 2 and y_dif == 0:
+                middle_row = min(pawn.row, row) + 1
+                if self.board[middle_row][col] == "":
+                    return False
+                return self.fence_check(pawn.row, pawn.col, row, col, checks=2)
+            if x_dif <= 1 and y_dif <= 1:
+                if (x_dif + y_dif) > 0:
+                    return self.fence_check(pawn.row, pawn.col, row, col)
+        return False
 
     def place_fence(self, x, y, orientation):
         if self.has_fence(x, y, orientation):
@@ -62,29 +72,35 @@ class Board:
         self.fences.append(fence)
         self.update_turn()
 
-    def fence_check(self, row, col, new_row, new_col):
-        if new_row == row:
+    def fence_check(self, row, col, new_row, new_col, checks=1):
+        if checks == 2:
             orientation = "v"
-        elif new_col == col:
-            orientation = "h"
+            start_x = max(row, new_row)
+            if self.has_fence(start_x, col, orientation) or self.has_fence(start_x-1, col, orientation):
+                return False
         else:
-            print("implement diagonal move checks later")
-            return
+            if new_row == row:
+                orientation = "v"
+            elif new_col == col:
+                orientation = "h"
+            else:
+                print("implement diagonal move checks later")
+                return
 
-        if orientation == "h":
-            f_x = max(row, new_row)
-            if self.has_fence(f_x, col, orientation):
-                print("yep, that's a horizontal fence @ ", f_x, col)
-                return False
-            else:
-                print("no fence detected")
-        elif orientation == "v":
-            f_y = max(col, new_col)
-            if self.has_fence(row, f_y, orientation):
-                print("yep, that's a vertical fence @ ", row, f_y)
-                return False
-            else:
-                print("no fence detected")
+            if orientation == "h":
+                f_x = max(row, new_row)
+                if self.has_fence(f_x, col, orientation):
+                    print("yep, that's a horizontal fence @ ", f_x, col)
+                    return False
+                else:
+                    print("no fence detected")
+            elif orientation == "v":
+                f_y = max(col, new_col)
+                if self.has_fence(row, f_y, orientation):
+                    print("yep, that's a vertical fence @ ", row, f_y)
+                    return False
+                else:
+                    print("no fence detected")
 
         return True
 
