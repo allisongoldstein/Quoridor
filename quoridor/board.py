@@ -28,6 +28,7 @@ class Board:
         self.selected_button = None
         
         self.info_cards = []
+        self.turn_display = None
 
         self.move_type = None
         self.game_status = "unfinished"
@@ -119,6 +120,7 @@ class Board:
             self.turn = 0
         button = self.get_button_by_id("pawn")
         self.set_selected_button(button)
+        self.turn_display.color = self.players[self.turn].color
 
     def win_check(self, pawn):
         if self.turn == 0:
@@ -197,6 +199,11 @@ class Board:
     def get_player(self):
         return self.players[self.turn]
 
+    def get_player_by_id(self, id):
+        for player in self.players:
+            if player.id == id:
+                return player
+
     def get_pawn(self, row, col):
         return self.board[row][col]
 
@@ -241,11 +248,11 @@ class Board:
                     self.v_fences[i][j] = "EDGE"
 
     def create_info_cards(self):
-        ids = ["p1_fences", "p2_fences", "turn", "pawn", "fence"]
+        ids = [0, 1, "turn", "pawn", "fence"]
         is_button = [False, False, False, True, True]
-        text = ["FENCES LEFT: 10", "FENCES: 10", "CURRENT TURN: 1", "MOVE PAWN", "PLACE FENCE"]
+        text = ["FENCES LEFT: ", "FENCES LEFT: ", "CURRENT TURN:", "MOVE PAWN", "PLACE FENCE"]
         color = [self.players[0].color, self.players[1].color, self.players[0].color, "x", "x"]
-        c_side = ["l", "l,", "r", "x", "x"]
+        c_side = ["l", "l", "r", None, None]
         h_offsets = [EDGE+10, TOTAL_HEIGHT-(EDGE+B_HEIGHT+10), TOTAL_HEIGHT//3.5, TOTAL_HEIGHT//2 - (B_GAP+B_HEIGHT), TOTAL_HEIGHT//2 + B_GAP]
         for i in range(len(ids)):
             info_card = Info_Card(ids[i], text[i], color[i], c_side[i], h_offsets[i])
@@ -253,6 +260,8 @@ class Board:
             if is_button[i] is True:
                 self.buttons.append(info_card)
                 self.button_coords.append([(B_X_OFFSET, B_X_OFFSET+B_WIDTH), (h_offsets[i], h_offsets[i]+B_HEIGHT)])
+            if ids[i] == "turn":
+                self.turn_display = info_card
         self.selected_button = self.buttons[0]
         self.move_type = self.selected_button.id
   
@@ -280,7 +289,11 @@ class Board:
             if self.selected_button == card:
                 card.draw(win, selected=True)
             else:
-                card.draw(win)
+                if type(card.id) == int:
+                    player = self.get_player_by_id(card.id)
+                    card.draw(win, count=player.remaining_fences)
+                else:
+                    card.draw(win)
         
     def draw(self, win):
         self.draw_board(win)

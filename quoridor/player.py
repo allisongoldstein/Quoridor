@@ -3,13 +3,13 @@ from .fence import Fence
 
 class Player():
 
-    def __init__(self, number):
-        self.number = number
-        self.start_coords = START_COORDS[number]
-        self.color = P_COLORS[number]
+    def __init__(self, id):
+        self.id = id
+        self.start_coords = START_COORDS[id]
+        self.color = P_COLORS[id]
         self.has_fences = True
         self.remaining_fences = 10
-        if self.number == 0:
+        if self.id == 0:
             self.goal_line = BOARD_Y_START
         else:
             self.goal_line = BOARD_Y_END-PADDING
