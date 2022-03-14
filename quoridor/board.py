@@ -56,14 +56,30 @@ class Board:
             x_dif = abs(row - pawn.row)
             y_dif = abs(col - pawn.col)
             if x_dif == 2 and y_dif == 0:
-                middle_row = min(pawn.row, row) + 1
-                if self.board[middle_row][col] == "":
-                    return False
-                return self.fence_check(pawn.row, pawn.col, row, col, checks=2)
+                return self.valid_jump(pawn, row, col)
             if x_dif <= 1 and y_dif <= 1:
                 if (x_dif + y_dif) > 0:
                     return self.fence_check(pawn.row, pawn.col, row, col)
         return False
+
+    def valid_jump(self, pawn, row, col):
+        middle_row = min(pawn.row, row) + 1
+        if self.board[middle_row][col] == "":
+            return False
+        return self.fence_check(pawn.row, pawn.col, row, col, checks=2)
+
+    def valid_diagonal_move(self, row, col, new_row, new_col):
+        if self.board[new_row][col] == "":
+                return False
+        if new_row > row:
+            if new_col > col:
+                return self.has_fence(new_row, new_col, "v")
+            else:
+                return self.has_fence(new_row, col, "v")
+        elif new_col > col:
+            return self.has_fence(new_row, new_col, "v")
+        else:
+            return self.has_fence(new_row, col, "v")
 
     def place_fence(self, x, y, orientation):
         if orientation == "h":
@@ -74,9 +90,6 @@ class Board:
             if self.has_fence(x, y, orientation) or self.has_fence(x+1, y, orientation):
                 print("fence already exists at location")
                 return False
-        # if self.has_fence(x, y, orientation):
-        #     print("fence already exists at location")
-        #     return False
         player = self.players[self.turn]
         fence = player.place_fence(x, y, orientation)
         if fence is False:
@@ -101,8 +114,11 @@ class Board:
             elif new_col == col:
                 orientation = "h"
             else:
-                print("implement diagonal move checks later")
-                return
+                print("diagonal move check")
+                if self.valid_diagonal_move(row, col, new_row, new_col):
+                    return False
+                else:
+                    return True
 
             if orientation == "h":
                 f_x = max(row, new_row)
