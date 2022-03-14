@@ -4,9 +4,9 @@ from .constants import *
 
 class Fence():
 
-    def __init__(self, coords, orientation, color):
-        self.row = coords[0]
-        self.col = coords[1]
+    def __init__(self, row, col, orientation, color):
+        self.row = row
+        self.col = col
         self.orientation = orientation
         self.color = color
         print(self)

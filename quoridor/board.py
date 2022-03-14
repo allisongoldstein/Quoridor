@@ -66,18 +66,26 @@ class Board:
         return False
 
     def place_fence(self, x, y, orientation):
-        if self.has_fence(x, y, orientation):
-            print("fence already exists at location")
-            return False
+        if orientation == "h":
+            if self.has_fence(x, y, orientation) or self.has_fence(x, y+1, orientation):
+                print("fence already exists at location")
+                return False
+        elif orientation == "v":
+            if self.has_fence(x, y, orientation) or self.has_fence(x+1, y, orientation):
+                print("fence already exists at location")
+                return False
+        # if self.has_fence(x, y, orientation):
+        #     print("fence already exists at location")
+        #     return False
         player = self.players[self.turn]
-        fence = player.place_fence((x, y), orientation)
+        fence = player.place_fence(x, y, orientation)
         if fence is False:
             return False
         if orientation == "h":
-            self.h_fences[x][y] = fence
+            self.h_fences[x][y], self.h_fences[x][y+1] = fence
         elif orientation == "v":
-            self.v_fences[x][y] = fence
-        self.fences.append(fence)
+            self.v_fences[x][y], self.v_fences[x+1][y] = fence
+        self.fences.append(fence[0])
         self.update_turn()
 
     def fence_check(self, row, col, new_row, new_col, checks=1):
