@@ -130,6 +130,9 @@ class Board:
         if pawn.row == START_COORDS[check][0]:
             print("player", self.turn, "wins")
             self.game_status = "finished"
+
+            self.turn_display.text = "PLAYER WINS!  "
+            self.turn_display.c_side = "l"
             return True
 
     def on_board(self, coords):
