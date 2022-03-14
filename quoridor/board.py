@@ -4,24 +4,31 @@ from .constants import *
 from .pawn import Pawn
 from .fence import Fence
 from .player import Player
-from .button import Button
+from .info_card import Info_Card
 
 
 class Board:
 
     def __init__(self):
         self.board = []
+
         self.player_count = 2
         self.players = []
         self.turn = 0
+
         self.pawns = []
         self.selected_pawn = None
-        self.buttons = []
-        self.button_coords = []
-        self.selected_button = None
+
         self.fences = []
         self.h_fences = [["" for _ in range(ROWS+1)] for _ in range(COLS+1)]
         self.v_fences = [["" for _ in range(ROWS+1)] for _ in range(COLS+1)]
+        
+        self.buttons = []
+        self.button_coords = []
+        self.selected_button = None
+        
+        self.info_cards = []
+
         self.move_type = None
         self.game_status = "unfinished"
         self.create_board()
@@ -212,8 +219,8 @@ class Board:
                 row.append("")
             self.board.append(row)
         self.create_players()
-        self.create_buttons()
         self.create_fences()
+        self.create_info_cards()
 
     def create_players(self):
         for num in range(self.player_count):
@@ -225,16 +232,6 @@ class Board:
             self.board[x][y] = pawn
             self.pawns.append(pawn)
 
-    def create_buttons(self):
-        ids = ["pawn", "fence"]
-        texts = ["MOVE PAWN", "PLACE FENCE"]
-        h_offsets = [TOTAL_HEIGHT//2 - (B_GAP+B_HEIGHT), TOTAL_HEIGHT//2 + B_GAP]
-        for i in range(len(ids)):
-            self.buttons.append(Button(ids[i], texts[i], h_offsets[i]))
-            self.button_coords.append([(TOTAL_HEIGHT, TOTAL_HEIGHT+B_WIDTH), (h_offsets[i], h_offsets[i]+B_HEIGHT)])
-        self.selected_button = self.buttons[0]
-        self.move_type = self.selected_button.id
-
     def create_fences(self):
         for i in range(ROWS+1):
             for j in range(COLS+1):
@@ -242,7 +239,23 @@ class Board:
                     self.h_fences[i][j] = "EDGE"
                 if not 0 < j < COLS:
                     self.v_fences[i][j] = "EDGE"
-        
+
+    def create_info_cards(self):
+        ids = ["p1_fences", "p2_fences", "turn", "pawn", "fence"]
+        is_button = [False, False, False, True, True]
+        text = ["FENCES LEFT: 10", "FENCES: 10", "CURRENT TURN: 1", "MOVE PAWN", "PLACE FENCE"]
+        color = [self.players[0].color, self.players[1].color, self.players[0].color, "x", "x"]
+        c_side = ["l", "l,", "r", "x", "x"]
+        h_offsets = [EDGE+10, TOTAL_HEIGHT-(EDGE+B_HEIGHT+10), TOTAL_HEIGHT//3.5, TOTAL_HEIGHT//2 - (B_GAP+B_HEIGHT), TOTAL_HEIGHT//2 + B_GAP]
+        for i in range(len(ids)):
+            info_card = Info_Card(ids[i], text[i], color[i], c_side[i], h_offsets[i])
+            self.info_cards.append(info_card)
+            if is_button[i] is True:
+                self.buttons.append(info_card)
+                self.button_coords.append([(B_X_OFFSET, B_X_OFFSET+B_WIDTH), (h_offsets[i], h_offsets[i]+B_HEIGHT)])
+        self.selected_button = self.buttons[0]
+        self.move_type = self.selected_button.id
+  
     def draw_board(self, win):
         win.fill(BG_COLOR)
         pygame.draw.rect(win, BLACK, (BOARD_X_START, BOARD_Y_START, BOARD_SIZE, BOARD_SIZE))
@@ -257,17 +270,17 @@ class Board:
                 else:
                     color = WHITE
                 pygame.draw.rect(win, color, ((BOARD_X_START+PADDING)+PADDING*i, player.goal_line, PADDING, PADDING))
-        
-    def draw_buttons(self, win):
-        for button in self.buttons:
-            if button == self.selected_button:
-                button.draw(win, "selected")
-            else:
-                button.draw(win)
 
     def draw_fences(self, win):
         for fence in self.fences:
             fence.draw_fence(win)
+
+    def draw_info_cards(self, win):
+        for card in self.info_cards:
+            if self.selected_button == card:
+                card.draw(win, selected=True)
+            else:
+                card.draw(win)
         
     def draw(self, win):
         self.draw_board(win)
@@ -278,5 +291,4 @@ class Board:
                 pawn.draw(win)
         
         self.draw_fences(win)
-
-        self.draw_buttons(win)
+        self.draw_info_cards(win)
