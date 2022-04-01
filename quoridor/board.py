@@ -59,27 +59,38 @@ class Board:
                 return self.valid_jump(pawn, row, col)
             if x_dif <= 1 and y_dif <= 1:
                 if (x_dif + y_dif) > 0:
-                    return self.fence_check(pawn.row, pawn.col, row, col)
+                    if x_dif == y_dif:  # diagonal move
+                        return self.valid_diagonal_move(pawn.row, pawn.col, row, col)
+                    else:
+                        return self.fence_check(pawn.row, pawn.col, row, col)
         return False
 
     def valid_jump(self, pawn, row, col):
         middle_row = min(pawn.row, row) + 1
         if self.board[middle_row][col] == "":
             return False
-        return self.fence_check(pawn.row, pawn.col, row, col, checks=2)
+        return self.fence_check(pawn.row, pawn.col, row, col, type="jump")
 
     def valid_diagonal_move(self, row, col, new_row, new_col):
+        jump_blocked = False
         if self.board[new_row][col] == "":
-                return False
+            return False
         if new_row > row:
+            jump_blocked = self.has_fence(new_row+1, col, "h")
             if new_col > col:
-                return self.has_fence(new_row, new_col, "v")
+                has_fence = self.has_fence(new_row, new_col, "v")
             else:
-                return self.has_fence(new_row, col, "v")
-        elif new_col > col:
-            return self.has_fence(new_row, new_col, "v")
+                has_fence = self.has_fence(new_row, col, "v")
         else:
-            return self.has_fence(new_row, col, "v")
+            jump_blocked = self.has_fence(new_row, col, "h")
+            if new_col > col:
+                has_fence = self.has_fence(new_row, new_col, "v")
+            else:    
+                has_fence = self.has_fence(new_row, col, "v")
+        if has_fence or not jump_blocked:
+            return False
+        else:
+            return True
 
     def place_fence(self, x, y, orientation):
         if orientation == "h":
@@ -101,8 +112,8 @@ class Board:
         self.fences.append(fence[0])
         self.update_turn()
 
-    def fence_check(self, row, col, new_row, new_col, checks=1):
-        if checks == 2:
+    def fence_check(self, row, col, new_row, new_col, type=None):
+        if type == "jump":
             orientation = "h"
             start_x = max(row, new_row)
             if self.has_fence(start_x, col, orientation) or self.has_fence(start_x-1, col, orientation):
@@ -113,24 +124,18 @@ class Board:
                 orientation = "v"
             elif new_col == col:
                 orientation = "h"
-            else:
-                print("diagonal move check")
-                if self.valid_diagonal_move(row, col, new_row, new_col):
-                    return False
-                else:
-                    return True
 
             if orientation == "h":
                 f_x = max(row, new_row)
                 if self.has_fence(f_x, col, orientation):
-                    print("yep, that's a horizontal fence @ ", f_x, col)
+                    print("horizontal fence @ ", f_x, col)
                     return False
                 else:
                     print("no fence detected")
             elif orientation == "v":
                 f_y = max(col, new_col)
                 if self.has_fence(row, f_y, orientation):
-                    print("yep, that's a vertical fence @ ", row, f_y)
+                    print("vertical fence @ ", row, f_y)
                     return False
                 else:
                     print("no fence detected")
